@@ -2,7 +2,7 @@
   "name": "@hexlet/code",
   "version": "0.0.1",
   "description": "[![Actions Status](https://github.com/vsorrokin/frontend-project-lvl2/workflows/hexlet-check/badge.svg)](https://github.com/vsorrokin/frontend-project-lvl2/actions)",
-  "main": "index.js",
+  "main": "src/compare_flat.js",
   "bin": {
     "gendiff": "bin/gendiff.js"
   },
@@ -21,7 +21,8 @@
   },
   "homepage": "https://github.com/vsorrokin/frontend-project-lvl2#readme",
   "dependencies": {
-    "commander": "^6.2.0"
+    "commander": "^6.2.0",
+    "lodash": "^4.17.20"
   },
   "devDependencies": {
     "eslint": "^7.13.0",
