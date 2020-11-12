@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax */
-import { promises as fs } from 'fs';
+import fs from 'fs';
 import path from 'path';
 import _ from 'lodash';
 
@@ -18,10 +18,9 @@ const stringifyReport = (diffReport) => {
 
 const getDiffRow = (action, key, value) => ({ action, key, value });
 
-const readJsonFiles = async (files) => {
-  const readPromises = files.map((file) => fs.readFile(path.resolve(file), 'utf-8'));
-  const result = await Promise.all(readPromises);
-  return result.map((it) => JSON.parse(it));
+const readJsonFile = (file) => {
+  const content = fs.readFileSync(path.resolve(file), 'utf-8');
+  return JSON.parse(content);
 };
 
 const getReportForExistingProps = (original, changed) => {
@@ -61,8 +60,9 @@ const getReportForNewProps = (original, changed) => {
   return diffReport;
 };
 
-export default async (file1, file2) => {
-  const [original, changed] = await readJsonFiles([file1, file2]);
+export default (file1, file2) => {
+  const original = readJsonFile(file1);
+  const changed = readJsonFile(file2);
 
   return stringifyReport([
     ...getReportForExistingProps(original, changed),
