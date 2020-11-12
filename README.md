@@ -18,8 +18,8 @@ General information:
     Compares two configuration files and shows a difference.
 
     Options:
-    -V, --version        output the version number
-    -f, --format [type]  output format
-    -h, --help           display help for command
+        -V, --version        output the version number
+        -f, --format [type]  output format
+        -h, --help           display help for command
 
-Example: https://asciinema.org/a/q7TH3hKtGgrJLTui4q0GUx2mu
+Example: https://asciinema.org/a/6DhwA9F3Zsg7as8WUxPBZVU63

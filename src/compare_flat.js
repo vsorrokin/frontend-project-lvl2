@@ -4,19 +4,34 @@ import path from 'path';
 import _ from 'lodash';
 
 const UNCHANGED = '';
+const CHANGED = '-+';
 const REMOVED = '-';
 const ADDED = '+';
 
+const getDiffRow = (action, key, value, newValue) => ({
+  action, key, value, newValue,
+});
+
+// Transform CHANGED record into two records: REMOVED + ADDED
+const transformChangedRecord = (line) => {
+  if (line.action === CHANGED) {
+    return [
+      getDiffRow(REMOVED, line.key, line.value),
+      getDiffRow(ADDED, line.key, line.newValue),
+    ];
+  }
+
+  return line;
+};
+
 const stringifyReport = (diffReport) => {
-  const lines = diffReport.map(({ action, key, value }) => {
+  const lines = diffReport.flatMap(transformChangedRecord).map(({ action, key, value }) => {
     const prefix = _.padStart(action, 4);
     return `${prefix} ${key}: ${value}`;
   });
 
   return `{\n${lines.join('\n')}\n}`;
 };
-
-const getDiffRow = (action, key, value) => ({ action, key, value });
 
 const readJsonFile = (file) => {
   const content = fs.readFileSync(path.resolve(file), 'utf-8');
@@ -26,7 +41,6 @@ const readJsonFile = (file) => {
 const getReportForExistingProps = (original, changed) => {
   const diffReport = [];
 
-  // Fill report with props: CHANGED/UNCHANGED/REMOVED
   for (const [originalKey, originalValue] of Object.entries(original)) {
     if (_.has(changed, originalKey)) {
       const changedValue = changed[originalKey];
@@ -34,12 +48,9 @@ const getReportForExistingProps = (original, changed) => {
       if (originalValue === changedValue) {
         diffReport.push(getDiffRow(UNCHANGED, originalKey, originalValue));
       } else {
-        // CHANGED
-        diffReport.push(getDiffRow(REMOVED, originalKey, originalValue));
-        diffReport.push(getDiffRow(ADDED, originalKey, changedValue));
+        diffReport.push(getDiffRow(CHANGED, originalKey, originalValue, changedValue));
       }
     } else {
-      // REMOVED
       diffReport.push(getDiffRow(REMOVED, originalKey, originalValue));
     }
   }
@@ -50,7 +61,6 @@ const getReportForExistingProps = (original, changed) => {
 const getReportForNewProps = (original, changed) => {
   const diffReport = [];
 
-  // Fill report with props: ADDED
   for (const [changedKey, changedValue] of Object.entries(changed)) {
     if (!_.has(original, changedKey)) {
       diffReport.push(getDiffRow(ADDED, changedKey, changedValue));
@@ -64,8 +74,12 @@ export default (file1, file2) => {
   const original = readJsonFile(file1);
   const changed = readJsonFile(file2);
 
-  return stringifyReport([
+  const diffReport = [
     ...getReportForExistingProps(original, changed),
     ...getReportForNewProps(original, changed),
-  ]);
+  ];
+
+  diffReport.sort((a, b) => a.key.localeCompare(b.key));
+
+  return stringifyReport(diffReport);
 };
