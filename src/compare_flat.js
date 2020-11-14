@@ -1,6 +1,5 @@
 /* eslint-disable no-restricted-syntax */
 import fs from 'fs';
-import path from 'path';
 import _ from 'lodash';
 
 const UNCHANGED = '';
@@ -34,7 +33,7 @@ const stringifyReport = (diffReport) => {
 };
 
 const readJsonFile = (file) => {
-  const content = fs.readFileSync(path.resolve(file), 'utf-8');
+  const content = fs.readFileSync(file, 'utf-8');
   return JSON.parse(content);
 };
 
