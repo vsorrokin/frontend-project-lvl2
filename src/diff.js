@@ -1,87 +1,100 @@
-/* eslint-disable no-restricted-syntax */
-import fs from 'fs';
 import _ from 'lodash';
-import path from 'path';
-import parsers from './parsers.js';
+import getObjFromFile from './get_obj_file.js';
+import Stringify from './stringify.js';
+import {
+  NESTED,
+  UNCHANGED,
+  CHANGED,
+  REMOVED,
+  ADDED,
+} from './flags.js';
 
-const UNCHANGED = '';
-const CHANGED = '-+';
-const REMOVED = '-';
-const ADDED = '+';
+const stringify = new Stringify();
 
-const getDiffRow = (action, key, value, newValue) => ({
-  action, key, value, newValue,
-});
-
-// Transform CHANGED record into two records: REMOVED + ADDED
-const transformChangedRecord = (line) => {
-  if (line.action === CHANGED) {
-    return [
-      getDiffRow(REMOVED, line.key, line.value),
-      getDiffRow(ADDED, line.key, line.newValue),
-    ];
+class DifferenceCalculator {
+  constructor(config = {}) {
+    this.config = config;
   }
 
-  return line;
-};
+  // Get diff record about one property
+  // eslint-disable-next-line class-methods-use-this
+  getRecord(action, key, value, newValue) {
+    return {
+      action, key, value, newValue,
+    };
+  }
 
-const stringifyReport = (diffReport) => {
-  const lines = diffReport.flatMap(transformChangedRecord).map(({ action, key, value }) => {
-    const prefix = _.padStart(action, 4);
-    return `${prefix} ${key}: ${value}`;
-  });
+  getDiffForExistingProps(original, changed) {
+    const diffReport = [];
 
-  return `{\n${lines.join('\n')}\n}`;
-};
+    Object.entries(original).forEach(([originalKey, originalValue]) => {
+      if (_.has(changed, originalKey)) {
+        const changedValue = changed[originalKey];
 
-const getObjFromFile = (file) => {
-  const content = fs.readFileSync(file, 'utf-8');
-  const ext = path.extname(file).substring(1);
-  return parsers[ext](content);
-};
-
-const getReportForExistingProps = (original, changed) => {
-  const diffReport = [];
-
-  for (const [originalKey, originalValue] of Object.entries(original)) {
-    if (_.has(changed, originalKey)) {
-      const changedValue = changed[originalKey];
-
-      if (originalValue === changedValue) {
-        diffReport.push(getDiffRow(UNCHANGED, originalKey, originalValue));
+        if (originalValue === changedValue) {
+          diffReport.push(this.getRecord(UNCHANGED, originalKey, originalValue));
+        } else {
+          diffReport.push(this.getRecord(CHANGED, originalKey, originalValue, changedValue));
+        }
       } else {
-        diffReport.push(getDiffRow(CHANGED, originalKey, originalValue, changedValue));
+        diffReport.push(this.getRecord(REMOVED, originalKey, originalValue));
       }
-    } else {
-      diffReport.push(getDiffRow(REMOVED, originalKey, originalValue));
-    }
+    });
+
+    return diffReport;
   }
 
-  return diffReport;
-};
+  getDiffForNewProps(original, changed) {
+    const diffReport = [];
 
-const getReportForNewProps = (original, changed) => {
-  const diffReport = [];
+    Object.entries(changed).forEach(([changedKey, changedValue]) => {
+      if (!_.has(original, changedKey)) {
+        diffReport.push(this.getRecord(ADDED, changedKey, changedValue));
+      }
+    });
 
-  for (const [changedKey, changedValue] of Object.entries(changed)) {
-    if (!_.has(original, changedKey)) {
-      diffReport.push(getDiffRow(ADDED, changedKey, changedValue));
-    }
+    return diffReport;
   }
 
-  return diffReport;
-};
+  getFlatDiff(original, changed) {
+    const diffReport = [
+      ...this.getDiffForExistingProps(original, changed),
+      ...this.getDiffForNewProps(original, changed),
+    ];
 
-export default (file1, file2) => {
-  const original = getObjFromFile(file1);
-  const changed = getObjFromFile(file2);
+    diffReport.sort((a, b) => a.key.localeCompare(b.key));
 
-  const diffReport = [
-    ...getReportForExistingProps(original, changed),
-    ...getReportForNewProps(original, changed),
-  ];
+    return diffReport;
+  }
 
-  diffReport.sort((a, b) => a.key.localeCompare(b.key));
+  getDeepDiff(original, changed) {
+    const diff = this.getFlatDiff(original, changed);
 
-  return stringifyReport(diffReport);
-};
+    diff.forEach(({
+      key,
+      value,
+      newValue,
+    }, idx) => {
+      if (typeof value === 'object' && typeof newValue === 'object') {
+        diff[idx] = {
+          action: NESTED,
+          key,
+          value: this.getDeepDiff(value, newValue),
+        };
+      }
+    });
+
+    return diff;
+  }
+
+  getFilesDiff(file1, file2) {
+    const original = getObjFromFile(file1);
+    const changed = getObjFromFile(file2);
+
+    const diff = this.getDeepDiff(original, changed);
+
+    return stringify.get(diff);
+  }
+}
+
+export default DifferenceCalculator;
