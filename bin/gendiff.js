@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { program } from 'commander';
-import compareFlat from '../src/compare_flat.js';
+import getDiff from '../src/diff.js';
 
 program
   .version('0.0.1')
@@ -8,7 +8,7 @@ program
   .arguments('<filepath1> <filepath2>')
   .option('-f, --format [type]', 'output format')
   .action(async (filepath1, filepath2) => {
-    const diff = await compareFlat(filepath1, filepath2);
+    const diff = await getDiff(filepath1, filepath2);
     console.log(diff);
   });
 

@@ -1,6 +1,8 @@
 /* eslint-disable no-restricted-syntax */
 import fs from 'fs';
 import _ from 'lodash';
+import path from 'path';
+import parsers from './parsers.js';
 
 const UNCHANGED = '';
 const CHANGED = '-+';
@@ -32,9 +34,10 @@ const stringifyReport = (diffReport) => {
   return `{\n${lines.join('\n')}\n}`;
 };
 
-const readJsonFile = (file) => {
+const getObjFromFile = (file) => {
   const content = fs.readFileSync(file, 'utf-8');
-  return JSON.parse(content);
+  const ext = path.extname(file).substring(1);
+  return parsers[ext](content);
 };
 
 const getReportForExistingProps = (original, changed) => {
@@ -70,8 +73,8 @@ const getReportForNewProps = (original, changed) => {
 };
 
 export default (file1, file2) => {
-  const original = readJsonFile(file1);
-  const changed = readJsonFile(file2);
+  const original = getObjFromFile(file1);
+  const changed = getObjFromFile(file2);
 
   const diffReport = [
     ...getReportForExistingProps(original, changed),
