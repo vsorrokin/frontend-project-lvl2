@@ -24,7 +24,7 @@ General information:
 
 **Examples:**
 
-    - Stylish flat objects: https://asciinema.org/a/jCaTHYXFL1ZHCRA1MG42WsMBX
-    - Stylish deep objects: https://asciinema.org/a/NVk6wDzMKRZ7Fino0EVxNR8vo
-    - Plain deep object: https://asciinema.org/a/CV3wVGhsBX7cbydXT3akGET5l
-    - JSON format: https://asciinema.org/a/2wVUzjfebtneLjUqv2xCY72Ki
+  - Stylish flat objects: https://asciinema.org/a/jCaTHYXFL1ZHCRA1MG42WsMBX
+  - Stylish deep objects: https://asciinema.org/a/NVk6wDzMKRZ7Fino0EVxNR8vo
+  - Plain deep object: https://asciinema.org/a/CV3wVGhsBX7cbydXT3akGET5l 
+  - JSON format: https://asciinema.org/a/2wVUzjfebtneLjUqv2xCY72Ki

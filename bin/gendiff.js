@@ -1,6 +1,8 @@
 #!/usr/bin/env node
-import { program } from 'commander';
+import commander from 'commander';
 import getDiff from '../src/diff.js';
+
+const { program } = commander;
 
 program
   .version('0.0.1')
