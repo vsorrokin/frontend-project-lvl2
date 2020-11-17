@@ -32,3 +32,15 @@ test('getDiff yml-json', async () => {
 
   expect(actual).toBe(expected);
 });
+
+test('getDiff yml-json plain', async () => {
+  const diffCalculator = new DifferenceCalculator({ formatter: 'plain' });
+
+  const original = getFixturePath('yml/deep/1.yml');
+  const changed = getFixturePath('json/deep/2.json');
+
+  const actual = await diffCalculator.getFilesDiff(original, changed);
+  const expected = await readFile('expected/deep_diff_plain.txt');
+
+  expect(actual).toBe(expected);
+});

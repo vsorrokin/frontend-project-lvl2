@@ -8,7 +8,7 @@ program
   .arguments('<filepath1> <filepath2>')
   .option('-f, --format [type]', 'output format')
   .action(async (filepath1, filepath2) => {
-    const diffCalculator = new DifferenceCalculator();
+    const diffCalculator = new DifferenceCalculator({ formatter: program.format || 'stylish' });
     const diff = await diffCalculator.getFilesDiff(filepath1, filepath2);
     console.log(diff);
   });

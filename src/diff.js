@@ -9,11 +9,14 @@ import {
   ADDED,
 } from './flags.js';
 
-const stringify = new Stringify();
-
 class DifferenceCalculator {
   constructor(config = {}) {
-    this.config = config;
+    this.config = {
+      formatter: 'stylish',
+      ...config,
+    };
+
+    this.stringify = new Stringify({ formatter: this.config.formatter });
   }
 
   // Get diff record about one property
@@ -93,7 +96,7 @@ class DifferenceCalculator {
 
     const diff = this.getDeepDiff(original, changed);
 
-    return stringify.get(diff);
+    return this.stringify.get(diff);
   }
 }
 
