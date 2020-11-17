@@ -8,7 +8,7 @@ import {
   UNCHANGED,
 } from '../flags.js';
 
-class Stylish {
+class Plain {
   constructor(config = {}) {
     this.config = {
       ...config,
@@ -65,4 +65,4 @@ class Stylish {
   }
 }
 
-export default Stylish;
+export default Plain;
