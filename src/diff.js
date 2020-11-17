@@ -2,15 +2,14 @@ import _ from 'lodash';
 import getObjFromFile from './get_obj_file.js';
 import stringify from './stringify.js';
 import {
-  NESTED,
   UNCHANGED,
   CHANGED,
   REMOVED,
   ADDED,
-} from './flags.js';
+} from './diff_types.js';
 
-const getRecord = (action, key, value, newValue) => ({
-  action, key, value, newValue,
+const getRecord = (type, key, value, newValue) => ({
+  type, key, value, newValue,
 });
 
 const getDiffForExistingProps = (original, changed) => {
@@ -60,15 +59,16 @@ const getDeepDiff = (original, changed) => {
   const diff = getFlatDiff(original, changed);
 
   diff.forEach(({
+    type,
     key,
     value,
     newValue,
   }, idx) => {
-    if (typeof value === 'object' && typeof newValue === 'object') {
+    if (_.isObject(value) && _.isObject(newValue)) {
       diff[idx] = {
-        action: NESTED,
+        type,
         key,
-        value: getDeepDiff(value, newValue),
+        children: getDeepDiff(value, newValue),
       };
     }
   });

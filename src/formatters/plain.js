@@ -1,11 +1,10 @@
 import _ from 'lodash';
 import {
-  NESTED,
   CHANGED,
   REMOVED,
   ADDED,
   UNCHANGED,
-} from '../flags.js';
+} from '../diff_types.js';
 
 const getValueString = (value) => {
   if (_.isObject(value)) {
@@ -15,11 +14,11 @@ const getValueString = (value) => {
   return typeof value === 'string' ? `'${value}'` : value;
 };
 
-const getRecordString = (action, key, value, newValue) => {
+const getRecordString = (type, key, value, newValue) => {
   const valueStr = getValueString(value);
   const newValueStr = getValueString(newValue);
 
-  switch (action) {
+  switch (type) {
     case REMOVED:
       return `Property '${key}' was removed`;
     case ADDED:
@@ -27,27 +26,28 @@ const getRecordString = (action, key, value, newValue) => {
     case CHANGED:
       return `Property '${key}' was updated. From ${valueStr} to ${newValueStr}`;
     default:
-      throw new Error(`Unknown action: '${action}'!`);
+      throw new Error(`Unknown action: '${type}'!`);
   }
 };
 
 const plain = (report, props = []) => report
-  .filter((line) => line.action !== UNCHANGED)
+  .filter((line) => line.type !== UNCHANGED)
   .flatMap((line) => {
     const {
-      action,
+      type,
       key,
       value,
+      children,
       newValue,
     } = line;
 
-    if (action === NESTED) {
-      return plain(value, [...props, key]);
+    if (children) {
+      return plain(children, [...props, key]);
     }
 
     const keyPath = [...props, key].join('.');
 
-    return getRecordString(action, keyPath, value, newValue);
+    return getRecordString(type, keyPath, value, newValue);
   }).join('\n');
 
 export default plain;

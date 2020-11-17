@@ -1,12 +1,11 @@
 /* eslint-disable no-use-before-define */
 import _ from 'lodash';
 import {
-  NESTED,
   CHANGED,
   REMOVED,
   ADDED,
   UNCHANGED,
-} from '../flags.js';
+} from '../diff_types.js';
 
 const ident = 4;
 
@@ -21,43 +20,62 @@ const getObject = (value, level = 1) => {
   const lines = [];
 
   Object.entries(value).forEach(([key, val]) => {
-    lines.push(getRecord(UNCHANGED, key, val, level));
+    lines.push(getRecord({ type: UNCHANGED, key, value: val }, level));
   });
 
   return wrap(lines, level);
 };
 
-const getRecordString = (actionStr, key, valueStr, level) => {
-  const prefix = _.padStart(actionStr, (level * ident) - 1);
+const getRecordString = (typeStr, key, valueStr, level) => {
+  const prefix = _.padStart(typeStr, (level * ident) - 1);
   return `${prefix} ${key}: ${valueStr}`;
 };
 
-const getRecord = (action, key, value, level) => {
+const getRecord = ({
+  type,
+  key,
+  value,
+  children,
+}, level) => {
   const newLevel = level + 1;
 
-  const valueStr = action === NESTED
-    ? stylish(value, newLevel)
+  const valueStr = children
+    ? stylish(children, newLevel)
     : getObject(value, newLevel);
 
-  const actionStr = action === NESTED ? '' : action;
+  const typeStr = children ? '' : type;
 
-  return getRecordString(actionStr, key, valueStr, level);
+  return getRecordString(typeStr, key, valueStr, level);
 };
 
 const getRecords = ({
-  action,
+  type,
   key,
+  children,
   value,
   newValue,
 }, level) => {
-  if (action === CHANGED) {
+  if (type === CHANGED && !children) {
     return [
-      getRecord(REMOVED, key, value, level),
-      getRecord(ADDED, key, newValue, level),
+      getRecord({
+        type: REMOVED,
+        key,
+        value,
+      }, level),
+      getRecord({
+        type: ADDED,
+        key,
+        value: newValue,
+      }, level),
     ];
   }
 
-  return getRecord(action, key, value, level);
+  return getRecord({
+    type,
+    key,
+    value,
+    children,
+  }, level);
 };
 
 const stylish = (report, level = 1) => {
