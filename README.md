@@ -22,4 +22,4 @@ General information:
         -f, --format [type]  output format
         -h, --help           display help for command
 
-Example: https://asciinema.org/a/6DhwA9F3Zsg7as8WUxPBZVU63
+Example: https://asciinema.org/a/67Wu0gFp8X0gq1wyO5DZqPUzk
