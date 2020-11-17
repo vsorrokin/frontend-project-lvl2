@@ -1,9 +1,3 @@
-/* eslint-disable class-methods-use-this */
+const json = (report) => JSON.stringify(report);
 
-class Json {
-  get(report) {
-    return JSON.stringify(report);
-  }
-}
-
-export default Json;
+export default json;

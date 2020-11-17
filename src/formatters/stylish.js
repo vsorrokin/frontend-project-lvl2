@@ -1,4 +1,4 @@
-/* eslint-disable class-methods-use-this */
+/* eslint-disable no-use-before-define */
 import _ from 'lodash';
 import {
   NESTED,
@@ -8,69 +8,62 @@ import {
   UNCHANGED,
 } from '../flags.js';
 
-class Stylish {
-  constructor(config = {}) {
-    this.config = {
-      ident: 4,
-      ...config,
-    };
+const ident = 4;
+
+const wrap = (lines, level) => {
+  const spaces = _.repeat(' ', (level - 1) * ident);
+  return `{\n${lines.join('\n')}\n${spaces}}`;
+};
+
+const getObject = (value, level = 1) => {
+  if (!_.isObject(value)) return value;
+
+  const lines = [];
+
+  Object.entries(value).forEach(([key, val]) => {
+    lines.push(getRecord(UNCHANGED, key, val, level));
+  });
+
+  return wrap(lines, level);
+};
+
+const getRecordString = (actionStr, key, valueStr, level) => {
+  const prefix = _.padStart(actionStr, (level * ident) - 1);
+  return `${prefix} ${key}: ${valueStr}`;
+};
+
+const getRecord = (action, key, value, level) => {
+  const newLevel = level + 1;
+
+  const valueStr = action === NESTED
+    ? stylish(value, newLevel)
+    : getObject(value, newLevel);
+
+  const actionStr = action === NESTED ? '' : action;
+
+  return getRecordString(actionStr, key, valueStr, level);
+};
+
+const getRecords = ({
+  action,
+  key,
+  value,
+  newValue,
+}, level) => {
+  if (action === CHANGED) {
+    return [
+      getRecord(REMOVED, key, value, level),
+      getRecord(ADDED, key, newValue, level),
+    ];
   }
 
-  getObject(value, level = 1) {
-    if (typeof value !== 'object' || value === null) return value;
+  return getRecord(action, key, value, level);
+};
 
-    const lines = [];
+const stylish = (report, level = 1) => {
+  const lines = report.flatMap((line) => getRecords(line, level));
 
-    Object.entries(value).forEach(([key, val]) => {
-      lines.push(this.getRecord(UNCHANGED, key, val, level));
-    });
+  return wrap(lines, level);
+};
 
-    return this.wrap(lines, level, this.config.ident);
-  }
-
-  getRecord(action, key, value, level) {
-    const newLevel = level + 1;
-
-    const valueStr = action === NESTED
-      ? this.get(value, newLevel)
-      : this.getObject(value, newLevel);
-
-    const actionStr = action === NESTED ? '' : action;
-
-    return this.getRecordString(actionStr, key, valueStr, level, this.config.ident);
-  }
-
-  getRecords({
-    action,
-    key,
-    value,
-    newValue,
-  }, level) {
-    if (action === CHANGED) {
-      return [
-        this.getRecord(REMOVED, key, value, level),
-        this.getRecord(ADDED, key, newValue, level),
-      ];
-    }
-
-    return this.getRecord(action, key, value, level);
-  }
-
-  getRecordString(actionStr, key, valueStr, level, ident = 4) {
-    const prefix = _.padStart(actionStr, (level * ident) - 1);
-    return `${prefix} ${key}: ${valueStr}`;
-  }
-
-  wrap(lines, level, ident = 4) {
-    const spaces = _.repeat(' ', (level - 1) * ident);
-    return `{\n${lines.join('\n')}\n${spaces}}`;
-  }
-
-  get(report, level = 1) {
-    const lines = report.flatMap((line) => this.getRecords(line, level));
-
-    return this.wrap(lines, level, this.config.ident);
-  }
-}
-
-export default Stylish;
+export default stylish;

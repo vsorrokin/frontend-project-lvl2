@@ -1,21 +1,8 @@
 import formatters from './formatters/index.js';
 
-class Stringify {
-  constructor(config = {}) {
-    this.config = {
-      formatter: 'stylish',
-      ident: 4,
-      ...config,
-    };
+const stringify = (report, config = {}) => {
+  const format = formatters[config.formatter || 'stylish'];
+  return format(report);
+};
 
-    this.formatter = new formatters[this.config.formatter]({
-      ident: this.config.ident,
-    });
-  }
-
-  get(diff) {
-    return this.formatter.get(diff);
-  }
-}
-
-export default Stringify;
+export default stringify;
