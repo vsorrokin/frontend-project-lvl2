@@ -22,4 +22,9 @@ General information:
         -f, --format [type]  output format
         -h, --help           display help for command
 
-Example: https://asciinema.org/a/67Wu0gFp8X0gq1wyO5DZqPUzk
+**Examples:**
+
+    - Stylish flat objects: https://asciinema.org/a/jCaTHYXFL1ZHCRA1MG42WsMBX
+    - Stylish deep objects: https://asciinema.org/a/NVk6wDzMKRZ7Fino0EVxNR8vo
+    - Plain deep object: https://asciinema.org/a/CV3wVGhsBX7cbydXT3akGET5l
+    - JSON format: https://asciinema.org/a/2wVUzjfebtneLjUqv2xCY72Ki
