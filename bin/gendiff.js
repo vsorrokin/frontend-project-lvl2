@@ -8,7 +8,7 @@ program
   .arguments('<filepath1> <filepath2>')
   .option('-f, --format [type]', 'output format')
   .action((filepath1, filepath2) => {
-    const diff = getDiff(filepath1, filepath2, { formatter: program.format || 'stylish' });
+    const diff = getDiff(filepath1, filepath2, program.format || 'stylish');
     console.log(diff);
   });
 

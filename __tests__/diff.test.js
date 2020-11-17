@@ -33,7 +33,7 @@ test('getDiff yml-json plain', () => {
   const original = getFixturePath('yml/deep/1.yml');
   const changed = getFixturePath('json/deep/2.json');
 
-  const actual = getDiff(original, changed, { formatter: 'plain' });
+  const actual = getDiff(original, changed, 'plain');
   const expected = readFile('expected/deep_diff_plain.txt');
 
   expect(actual).toBe(expected);
@@ -43,7 +43,7 @@ test('getDiff yml-json json', () => {
   const original = getFixturePath('yml/deep/1.yml');
   const changed = getFixturePath('json/deep/2.json');
 
-  const actual = getDiff(original, changed, { formatter: 'json' });
+  const actual = getDiff(original, changed, 'json');
   const expected = readFile('expected/deep_diff_json.txt');
 
   expect(actual).toBe(expected);

@@ -1,7 +1,7 @@
 import formatters from './formatters/index.js';
 
-const stringify = (report, config = {}) => {
-  const format = formatters[config.formatter || 'stylish'];
+const stringify = (report, formatter) => {
+  const format = formatters[formatter || 'stylish'];
   return format(report);
 };
 
