@@ -42,9 +42,7 @@ const getFlatDiff = (original, changed) => {
     ...getDiffForNewProps(original, changed),
   ];
 
-  diffReport.sort((a, b) => a.key.localeCompare(b.key));
-
-  return diffReport;
+  return [...diffReport].sort((a, b) => a.key.localeCompare(b.key));
 };
 
 const getDeepDiff = (original, changed) => {
