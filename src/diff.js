@@ -42,29 +42,27 @@ const getFlatDiff = (original, changed) => {
     ...getDiffForNewProps(original, changed),
   ];
 
-  return [...diffReport].sort((a, b) => a.key.localeCompare(b.key));
+  return _.sortBy(diffReport, 'key');
 };
 
-const getDeepDiff = (original, changed) => {
-  const diff = getFlatDiff(original, changed);
-
-  diff.forEach(({
+const getDeepDiff = (original, changed) => getFlatDiff(original, changed).map((diff) => {
+  const {
     type,
     key,
     value,
     newValue,
-  }, idx) => {
-    if (_.isObject(value) && _.isObject(newValue)) {
-      diff[idx] = {
-        type,
-        key,
-        children: getDeepDiff(value, newValue),
-      };
-    }
-  });
+  } = diff;
+
+  if (_.isObject(value) && _.isObject(newValue)) {
+    return {
+      type,
+      key,
+      children: getDeepDiff(value, newValue),
+    };
+  }
 
   return diff;
-};
+});
 
 const getFilesDiff = (file1, file2, formatter) => {
   const original = getObjFromFile(file1);
