@@ -17,11 +17,11 @@ const wrap = (lines, level) => {
 const getObject = (value, level = 1) => {
   if (!_.isObject(value)) return value;
 
-  const lines = [];
-
-  Object.entries(value).forEach(([key, val]) => {
-    lines.push(getRecord({ type: UNCHANGED, key, value: val }, level));
-  });
+  const lines = Object.entries(value).map(([key, val]) => getRecord({
+    type: UNCHANGED,
+    key,
+    value: val,
+  }, level));
 
   return wrap(lines, level);
 };

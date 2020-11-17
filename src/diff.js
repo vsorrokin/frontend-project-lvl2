@@ -12,37 +12,29 @@ const getRecord = (type, key, value, newValue) => ({
   type, key, value, newValue,
 });
 
-const getDiffForExistingProps = (original, changed) => {
-  const diffReport = [];
-
-  Object.entries(original).forEach(([originalKey, originalValue]) => {
+const getDiffForExistingProps = (original, changed) => Object.entries(original)
+  .reduce((acc, [originalKey, originalValue]) => {
     if (_.has(changed, originalKey)) {
       const changedValue = changed[originalKey];
 
       if (originalValue === changedValue) {
-        diffReport.push(getRecord(UNCHANGED, originalKey, originalValue));
-      } else {
-        diffReport.push(getRecord(CHANGED, originalKey, originalValue, changedValue));
+        return [...acc, getRecord(UNCHANGED, originalKey, originalValue)];
       }
-    } else {
-      diffReport.push(getRecord(REMOVED, originalKey, originalValue));
+
+      return [...acc, getRecord(CHANGED, originalKey, originalValue, changedValue)];
     }
-  });
 
-  return diffReport;
-};
+    return [...acc, getRecord(REMOVED, originalKey, originalValue)];
+  }, []);
 
-const getDiffForNewProps = (original, changed) => {
-  const diffReport = [];
-
-  Object.entries(changed).forEach(([changedKey, changedValue]) => {
+const getDiffForNewProps = (original, changed) => Object.entries(changed)
+  .reduce((acc, [changedKey, changedValue]) => {
     if (!_.has(original, changedKey)) {
-      diffReport.push(getRecord(ADDED, changedKey, changedValue));
+      return [...acc, getRecord(ADDED, changedKey, changedValue)];
     }
-  });
 
-  return diffReport;
-};
+    return acc;
+  }, []);
 
 const getFlatDiff = (original, changed) => {
   const diffReport = [
