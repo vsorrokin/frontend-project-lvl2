@@ -1,4 +1,4 @@
-export const UNCHANGED = '';
-export const CHANGED = '-+';
-export const REMOVED = '-';
-export const ADDED = '+';
+export const UNCHANGED = 'UNCHANGED';
+export const CHANGED = 'CHANGED';
+export const REMOVED = 'REMOVED';
+export const ADDED = 'ADDED';

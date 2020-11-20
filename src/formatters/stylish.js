@@ -7,6 +7,12 @@ import {
   UNCHANGED,
 } from '../diffTypes.js';
 
+const mappings = {
+  [ADDED]: '+',
+  [REMOVED]: '-',
+  [UNCHANGED]: '',
+};
+
 const ident = 4;
 
 const wrap = (lines, level) => {
@@ -43,7 +49,7 @@ const getRecord = ({
     ? stylish(children, newLevel)
     : getObject(value, newLevel);
 
-  const typeStr = children ? '' : type;
+  const typeStr = children ? '' : mappings[type];
 
   return getRecordString(typeStr, key, valueStr, level);
 };
