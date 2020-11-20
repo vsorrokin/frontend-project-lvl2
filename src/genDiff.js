@@ -1,12 +1,12 @@
 import _ from 'lodash';
-import getObjFromFile from './get_obj_file.js';
+import getObjFromFile from './getObjFromFile.js';
 import stringify from './stringify.js';
 import {
   UNCHANGED,
   CHANGED,
   REMOVED,
   ADDED,
-} from './diff_types.js';
+} from './diffTypes.js';
 
 const getRecord = (type, key, value, newValue) => ({
   type, key, value, newValue,

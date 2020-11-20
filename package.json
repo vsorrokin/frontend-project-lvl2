@@ -1,10 +1,10 @@
 {
   "name": "@hexlet/code",
   "version": "0.0.1",
-  "description": "[![Actions Status](https://github.com/vsorrokin/frontend-project-lvl2/workflows/hexlet-check/badge.svg)](https://github.com/vsorrokin/frontend-project-lvl2/actions)",
-  "main": "src/diff.js",
+  "description": "This package lets you to compare yaml and json files and output the difference in a various formats",
+  "main": "index.js",
   "bin": {
-    "gendiff": "bin/gendiff.js"
+    "gendiff": "bin/genDiff.js"
   },
   "scripts": {
     "test": "jest",

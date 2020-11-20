@@ -4,7 +4,7 @@ import {
   REMOVED,
   ADDED,
   UNCHANGED,
-} from '../diff_types.js';
+} from '../diffTypes.js';
 
 const getValueString = (value) => {
   if (_.isObject(value)) {

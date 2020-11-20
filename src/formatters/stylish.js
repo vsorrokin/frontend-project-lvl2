@@ -5,7 +5,7 @@ import {
   REMOVED,
   ADDED,
   UNCHANGED,
-} from '../diff_types.js';
+} from '../diffTypes.js';
 
 const ident = 4;
 
