@@ -1,6 +1,5 @@
 import _ from 'lodash';
-import getObjFromFile from './getObjFromFile.js';
-import stringify from './stringify.js';
+
 import {
   UNCHANGED,
   CHANGED,
@@ -64,13 +63,4 @@ const getDeepDiff = (original, changed) => getFlatDiff(original, changed).map((d
   return diff;
 });
 
-const getFilesDiff = (file1, file2, formatter) => {
-  const original = getObjFromFile(file1);
-  const changed = getObjFromFile(file2);
-
-  const diff = getDeepDiff(original, changed);
-
-  return stringify(diff, formatter);
-};
-
-export default getFilesDiff;
+export default getDeepDiff;
