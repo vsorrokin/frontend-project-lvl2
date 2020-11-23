@@ -5,12 +5,14 @@ import {
   REMOVED,
   ADDED,
   UNCHANGED,
+  NESTED,
 } from '../diffTypes.js';
 
 const mappings = {
   [ADDED]: '+',
   [REMOVED]: '-',
   [UNCHANGED]: '',
+  [NESTED]: '',
 };
 
 const ident = 4;
@@ -45,11 +47,11 @@ const getRecord = ({
 }, level) => {
   const newLevel = level + 1;
 
-  const valueStr = children
+  const valueStr = type === NESTED
     ? stylish(children, newLevel)
     : getObject(value, newLevel);
 
-  const typeStr = children ? '' : mappings[type];
+  const typeStr = mappings[type];
 
   return getRecordString(typeStr, key, valueStr, level);
 };
@@ -61,7 +63,7 @@ const getRecords = ({
   value,
   newValue,
 }, level) => {
-  if (type === CHANGED && !children) {
+  if (type === CHANGED) {
     return [
       getRecord({
         type: REMOVED,

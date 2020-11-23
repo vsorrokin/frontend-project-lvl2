@@ -5,6 +5,7 @@ import {
   CHANGED,
   REMOVED,
   ADDED,
+  NESTED,
 } from './diffTypes.js';
 
 const getRecord = (type, key, value, newValue) => ({
@@ -46,7 +47,6 @@ const getFlatDiff = (original, changed) => {
 
 const getDeepDiff = (original, changed) => getFlatDiff(original, changed).map((diff) => {
   const {
-    type,
     key,
     value,
     newValue,
@@ -54,7 +54,7 @@ const getDeepDiff = (original, changed) => getFlatDiff(original, changed).map((d
 
   if (_.isObject(value) && _.isObject(newValue)) {
     return {
-      type,
+      type: NESTED,
       key,
       children: getDeepDiff(value, newValue),
     };

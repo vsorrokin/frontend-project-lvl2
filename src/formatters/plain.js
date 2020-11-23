@@ -4,6 +4,7 @@ import {
   REMOVED,
   ADDED,
   UNCHANGED,
+  NESTED,
 } from '../diffTypes.js';
 
 const getValueString = (value) => {
@@ -41,7 +42,7 @@ const plain = (report, props = []) => report
       newValue,
     } = line;
 
-    if (children) {
+    if (type === NESTED) {
       return plain(children, [...props, key]);
     }
 
