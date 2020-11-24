@@ -3,64 +3,48 @@ import _ from 'lodash';
 import {
   UNCHANGED,
   CHANGED,
-  REMOVED,
+  DELETED,
   ADDED,
   NESTED,
 } from './diffTypes.js';
 
-const getRecord = (type, key, value, newValue) => ({
-  type, key, value, newValue,
-});
-
-const getDiffForExistingProps = (original, changed) => Object.entries(original)
-  .reduce((acc, [originalKey, originalValue]) => {
-    if (_.has(changed, originalKey)) {
-      const changedValue = changed[originalKey];
-
-      if (originalValue === changedValue) {
-        return [...acc, getRecord(UNCHANGED, originalKey, originalValue)];
-      }
-
-      return [...acc, getRecord(CHANGED, originalKey, originalValue, changedValue)];
-    }
-
-    return [...acc, getRecord(REMOVED, originalKey, originalValue)];
-  }, []);
-
-const getDiffForNewProps = (original, changed) => Object.entries(changed)
-  .reduce((acc, [changedKey, changedValue]) => {
-    if (!_.has(original, changedKey)) {
-      return [...acc, getRecord(ADDED, changedKey, changedValue)];
-    }
-
-    return acc;
-  }, []);
-
-const getFlatDiff = (original, changed) => {
-  const diffReport = [
-    ...getDiffForExistingProps(original, changed),
-    ...getDiffForNewProps(original, changed),
-  ];
-
-  return _.sortBy(diffReport, 'key');
-};
-
-const getDeepDiff = (original, changed) => getFlatDiff(original, changed).map((diff) => {
-  const {
-    key,
-    value,
-    newValue,
-  } = diff;
-
-  if (_.isObject(value) && _.isObject(newValue)) {
+const getRecord = (type, key, value, newValue) => {
+  if (type === NESTED) {
     return {
-      type: NESTED,
-      key,
-      children: getDeepDiff(value, newValue),
+      type, key, children: value,
     };
   }
+  return {
+    type, key, value, newValue,
+  };
+};
 
-  return diff;
-});
+const genDiff = (original, changed) => {
+  const keys = _.sortBy(_.keys({ ...original, ...changed }));
 
-export default getDeepDiff;
+  return keys.reduce((acc, key) => {
+    const originalValue = original[key];
+    const changedValue = changed[key];
+
+    if (_.has(original, key) && !_.has(changed, key)) {
+      return [...acc, getRecord(DELETED, key, originalValue)];
+    }
+
+    if (_.has(changed, key) && !_.has(original, key)) {
+      return [...acc, getRecord(ADDED, key, changedValue)];
+    }
+
+    if (originalValue === changedValue) {
+      return [...acc, getRecord(UNCHANGED, key, originalValue)];
+    }
+
+    if (_.isObject(originalValue) && _.isObject(changedValue)) {
+      const children = genDiff(originalValue, changedValue);
+      return [...acc, getRecord(NESTED, key, children)];
+    }
+
+    return [...acc, getRecord(CHANGED, key, originalValue, changedValue)];
+  }, []);
+};
+
+export default genDiff;

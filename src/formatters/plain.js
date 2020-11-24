@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import {
   CHANGED,
-  REMOVED,
+  DELETED,
   ADDED,
   UNCHANGED,
   NESTED,
@@ -20,7 +20,7 @@ const getRecordString = (type, key, value, newValue) => {
   const newValueStr = getValueString(newValue);
 
   switch (type) {
-    case REMOVED:
+    case DELETED:
       return `Property '${key}' was removed`;
     case ADDED:
       return `Property '${key}' was added with value: ${valueStr}`;

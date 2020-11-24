@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import {
   CHANGED,
-  REMOVED,
+  DELETED,
   ADDED,
   UNCHANGED,
   NESTED,
@@ -10,7 +10,7 @@ import {
 
 const mappings = {
   [ADDED]: '+',
-  [REMOVED]: '-',
+  [DELETED]: '-',
   [UNCHANGED]: '',
   [NESTED]: '',
 };
@@ -66,7 +66,7 @@ const getRecords = ({
   if (type === CHANGED) {
     return [
       getRecord({
-        type: REMOVED,
+        type: DELETED,
         key,
         value,
       }, level),

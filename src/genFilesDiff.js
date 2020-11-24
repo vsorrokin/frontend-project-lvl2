@@ -4,22 +4,18 @@ import parsers from './parsers.js';
 import formatters from './formatters/index.js';
 import genDiff from './genDiff.js';
 
-const parse = (content, filePath) => {
-  const ext = path.extname(filePath).substring(1);
-  return parsers[ext](content);
-};
+const getExt = (filePath) => path.extname(filePath).substring(1);
 
-const format = (diff, formatterName) => {
-  const formatter = formatters[formatterName || 'stylish'];
-  return formatter(diff);
-};
+const parse = (data, format) => parsers[format](data);
 
-const genFilesDiff = (file1Path, file2Path, formatterName) => {
+const format = (diff, formatterName) => formatters[formatterName](diff);
+
+const genFilesDiff = (file1Path, file2Path, formatterName = 'stylish') => {
   const file1Content = fs.readFileSync(file1Path, 'utf-8');
   const file2Content = fs.readFileSync(file2Path, 'utf-8');
 
-  const file1Object = parse(file1Content, file1Path);
-  const file2Object = parse(file2Content, file2Path);
+  const file1Object = parse(file1Content, getExt(file1Path));
+  const file2Object = parse(file2Content, getExt(file2Path));
 
   const diff = genDiff(file1Object, file2Object);
 
