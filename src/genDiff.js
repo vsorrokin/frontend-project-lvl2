@@ -5,11 +5,11 @@ import {
   CHANGED,
   DELETED,
   ADDED,
-  NESTED,
-} from './diffTypes.js';
+  PARENT,
+} from './nodeTypes.js';
 
-const getRecord = (type, key, value, newValue) => {
-  if (type === NESTED) {
+const buildNode = (type, key, value, newValue) => {
+  if (type === PARENT) {
     return {
       type, key, children: value,
     };
@@ -22,29 +22,29 @@ const getRecord = (type, key, value, newValue) => {
 const genDiff = (original, changed) => {
   const keys = _.sortBy(_.keys({ ...original, ...changed }));
 
-  return keys.reduce((acc, key) => {
+  return keys.map((key) => {
     const originalValue = original[key];
     const changedValue = changed[key];
 
     if (_.has(original, key) && !_.has(changed, key)) {
-      return [...acc, getRecord(DELETED, key, originalValue)];
+      return buildNode(DELETED, key, originalValue);
     }
 
     if (_.has(changed, key) && !_.has(original, key)) {
-      return [...acc, getRecord(ADDED, key, changedValue)];
+      return buildNode(ADDED, key, changedValue);
     }
 
     if (originalValue === changedValue) {
-      return [...acc, getRecord(UNCHANGED, key, originalValue)];
+      return buildNode(UNCHANGED, key, originalValue);
     }
 
     if (_.isObject(originalValue) && _.isObject(changedValue)) {
       const children = genDiff(originalValue, changedValue);
-      return [...acc, getRecord(NESTED, key, children)];
+      return buildNode(PARENT, key, children);
     }
 
-    return [...acc, getRecord(CHANGED, key, originalValue, changedValue)];
-  }, []);
+    return buildNode(CHANGED, key, originalValue, changedValue);
+  });
 };
 
 export default genDiff;

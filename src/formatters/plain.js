@@ -4,51 +4,45 @@ import {
   DELETED,
   ADDED,
   UNCHANGED,
-  NESTED,
-} from '../diffTypes.js';
+  PARENT,
+} from '../nodeTypes.js';
 
-const getValueString = (value) => {
+const stringifyValue = (value) => {
   if (_.isObject(value)) {
     return '[complex value]';
   }
 
-  return typeof value === 'string' ? `'${value}'` : value;
+  return _.isString(value) ? `'${value}'` : value;
 };
 
-const getRecordString = (type, key, value, newValue) => {
-  const valueStr = getValueString(value);
-  const newValueStr = getValueString(newValue);
-
-  switch (type) {
-    case DELETED:
-      return `Property '${key}' was removed`;
-    case ADDED:
-      return `Property '${key}' was added with value: ${valueStr}`;
-    case CHANGED:
-      return `Property '${key}' was updated. From ${valueStr} to ${newValueStr}`;
-    default:
-      throw new Error(`Unknown action: '${type}'!`);
-  }
-};
-
-const plain = (report, props = []) => report
-  .filter((line) => line.type !== UNCHANGED)
-  .flatMap((line) => {
-    const {
+const plain = (diffTree) => {
+  const iter = (innerTree, nodePath = []) => innerTree
+    .map(({
       type,
       key,
       value,
       children,
       newValue,
-    } = line;
+    }) => {
+      const nodePathStr = [...nodePath, key].join('.');
 
-    if (type === NESTED) {
-      return plain(children, [...props, key]);
-    }
+      switch (type) {
+        case DELETED:
+          return `Property '${nodePathStr}' was removed`;
+        case ADDED:
+          return `Property '${nodePathStr}' was added with value: ${stringifyValue(value)}`;
+        case CHANGED:
+          return `Property '${nodePathStr}' was updated. From ${stringifyValue(value)} to ${stringifyValue(newValue)}`;
+        case UNCHANGED:
+          return null;
+        case PARENT:
+          return iter(children, [...nodePath, key]);
+        default:
+          throw new Error(`Unknown node type: '${type}'!`);
+      }
+    }).filter((s) => s).join('\n');
 
-    const keyPath = [...props, key].join('.');
-
-    return getRecordString(type, keyPath, value, newValue);
-  }).join('\n');
+  return iter(diffTree);
+};
 
 export default plain;
