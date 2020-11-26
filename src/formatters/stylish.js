@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import _ from 'lodash';
 import {
   CHANGED,
@@ -9,64 +8,84 @@ import {
 } from '../nodeTypes.js';
 
 const mappings = {
-  [ADDED]: '+',
-  [DELETED]: '-',
+  [ADDED]: '+ ',
+  [DELETED]: '- ',
   [UNCHANGED]: '',
   [PARENT]: '',
 };
 
-const ident = 4;
+const spacesCount = 4;
+const replacer = ' ';
 
 const wrap = (lines, depth) => {
-  const spaces = _.repeat(' ', depth * ident);
-  return `{\n${lines.join('\n')}\n${spaces}}`;
+  const indentSize = depth * spacesCount;
+  const bracketIndent = replacer.repeat(indentSize - spacesCount);
+  return [
+    '{',
+    ...lines,
+    `${bracketIndent}}`,
+  ].join('\n');
 };
 
 const stringifyValue = (value, depth = 1) => {
-  if (!_.isObject(value)) return value;
+  const iter = (currentValue, currentDepth) => {
+    if (!_.isObject(currentValue)) {
+      return String(currentValue);
+    }
 
-  return wrap(Object.entries(value).map(([key, val]) => {
-    const spaces = _.repeat(' ', depth * ident);
-    const v = _.isObject(val) ? stringifyValue(val, depth + 1) : val;
-    return `${spaces}${key}: ${v}`;
-  }), depth - 1);
+    const indentSize = currentDepth * spacesCount;
+    const currentIndent = replacer.repeat(indentSize);
+    const lines = Object
+      .entries(currentValue)
+      .map(([key, val]) => `${currentIndent}${key}: ${iter(val, currentDepth + 1)}`);
+
+    return wrap(lines, currentDepth);
+  };
+
+  return iter(value, depth);
 };
 
 const stringifyNode = (type, key, value, depth) => {
   const typeStr = mappings[type];
-  const identDepth = depth * ident - 1;
-  const paddedTypeStr = _.padStart(typeStr, identDepth);
+  const indentSize = depth * spacesCount;
+  const paddedTypeStr = _.padStart(typeStr, indentSize);
+
   const nodeValue = stringifyValue(value, depth + 1);
-  return `${paddedTypeStr} ${key}: ${nodeValue}`;
+
+  return `${paddedTypeStr}${key}: ${nodeValue}`;
 };
 
-const stylish = (diffTree) => {
-  const iter = (innerTree, depth = 1) => wrap(innerTree
-    .flatMap(({
-      type,
-      key,
-      value,
-      children,
-      newValue,
-    }) => {
-      switch (type) {
-        case DELETED:
-        case ADDED:
-        case UNCHANGED:
-          return stringifyNode(type, key, value, depth);
-        case CHANGED:
-          return [
-            stringifyNode(DELETED, key, value, depth),
-            stringifyNode(ADDED, key, newValue, depth),
-          ];
-        case PARENT:
-          return stringifyNode(type, key, iter(children, depth + 1), depth);
-        default:
-          throw new Error(`Unknown node type: '${type}'!`);
-      }
-    }), depth - 1);
+const formatStylish = (diffTree) => {
+  const iter = (innerTree, depth = 1) => {
+    const lines = innerTree
+      .flatMap(({
+        type,
+        key,
+        value,
+        children,
+        newValue,
+      }) => {
+        switch (type) {
+          case DELETED:
+          case ADDED:
+          case UNCHANGED:
+            return stringifyNode(type, key, value, depth);
+          case CHANGED:
+            return [
+              stringifyNode(DELETED, key, value, depth),
+              stringifyNode(ADDED, key, newValue, depth),
+            ];
+          case PARENT:
+            return stringifyNode(type, key, iter(children, depth + 1), depth);
+          default:
+            throw new Error(`Unknown node type: '${type}'!`);
+        }
+      });
+
+    return wrap(lines, depth);
+  };
 
   return iter(diffTree);
 };
 
-export default stylish;
+export default formatStylish;

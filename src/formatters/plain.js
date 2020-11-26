@@ -15,9 +15,9 @@ const stringifyValue = (value) => {
   return _.isString(value) ? `'${value}'` : value;
 };
 
-const plain = (diffTree) => {
+const formatPlain = (tree) => {
   const iter = (innerTree, nodePath = []) => innerTree
-    .map(({
+    .flatMap(({
       type,
       key,
       value,
@@ -40,9 +40,13 @@ const plain = (diffTree) => {
         default:
           throw new Error(`Unknown node type: '${type}'!`);
       }
-    }).filter((s) => s).join('\n');
+    }).filter((s) => s);
 
-  return iter(diffTree);
+  return iter(tree);
 };
 
-export default plain;
+const toString = (lines) => lines.join('\n');
+
+const stringify = (tree) => toString(formatPlain(tree));
+
+export default stringify;
